@@ -10,9 +10,10 @@
 - **8 pillars**: Financial Accounting, Financial Planning, Treasury & Cash Management, Revenue & Receivables, Expenses & Payables, Tax & Financial Compliance, Capital Structure, Capital Allocation. Each has an objective and sections with notes and attached tools.
 - **Tool library**: 6 groups (Accounting & Financial Reporting, Financial Planning, Banking/Treasury & Capital, Financial Operations, Tax/Risk & Compliance, Financial Infrastructure) with 300+ seed tools and a searchable picker.
 - **Hoverable tool logos**: hovering or focusing any tool icon shows its name and a link to the official website (new tab, `rel="noopener noreferrer"`). The popover stays open while the pointer moves onto the link, closes on Esc, and is wired with `aria-describedby`.
-- **localStorage persistence** (`canvass:v1`) with a "Reset to default" action.
-
-> Status: initial scaffold. The canvas renders the company card, 3 frames and 8 pillar headers; inline editing, sections and the tool picker UI are on the roadmap.
+- **Inline editing**: click any text (frame titles and bullets, company fields, pillar titles and objectives, section titles, block headings and bullets) to edit. Enter or blur saves, Esc cancels.
+- **Add/remove everywhere**: add or remove bullets, blocks, sections and tools. Every change is undoable with **Undo**.
+- **Tool picker**: searchable, category-filtered picker over the seed tools, used by the 6 library groups and by each pillar section.
+- **localStorage persistence** (`canvass:v1`), a "Reset to default" action (undoable), and **JSON export/import** of the whole map.
 
 ## Stack
 
@@ -37,13 +38,13 @@ pnpm lint     # lint
 ```
 src/
   components/
-    canvas/    pan/zoom canvas, company card, SVG connectors
+    canvas/    pan/zoom canvas, company card, SVG connectors, toolbar
     frames/    the 3 strategy frames
-    pillars/   pillar headers, sections
-    tools/     ToolIcon (hover popover), ToolGrid, ToolPicker
-  store/       Zustand store + persistence
+    pillars/   pillars and their sections
+    tools/     ToolIcon (hover popover), ToolGrid, ToolPicker, LibraryGroup
+  store/       Zustand store (persist + undo) and pure map operations
   data/        defaultMap.ts, tools.ts (seed tool library)
-  lib/         viewport math, ids
+  lib/         viewport math, ids, JSON import/export
   types/       shared TypeScript types
 tests/         Vitest tests
 docs/          documentation
@@ -51,11 +52,11 @@ docs/          documentation
 
 ## Roadmap
 
-- Inline editing for all text; add/remove sections, bullets and tools
-- Tool picker wired into library groups and pillar sections
-- Editable company card and direct reports
-- Import/export of the map as JSON
+- Drag-to-reorder sections and pillars
 - Real logo assets for seed tools
+- Custom (user-defined) tools in the picker
+- Keyboard shortcuts (undo/redo, fit)
+- Redo support
 
 ## Contributing
 

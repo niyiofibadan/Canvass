@@ -348,3 +348,12 @@ export function searchTools(query: string, category?: ToolCategoryId): Tool[] {
     (t) => (!category || t.category === category) && (!q || t.name.toLowerCase().includes(q)),
   )
 }
+
+export const CATEGORY_LABELS: Record<ToolCategoryId, string> = {
+  accounting: 'Accounting & Financial Reporting',
+  planning: 'Financial Planning',
+  banking: 'Banking, Treasury & Capital',
+  operations: 'Financial Operations',
+  tax: 'Tax, Risk & Compliance',
+  infrastructure: 'Financial Infrastructure',
+}

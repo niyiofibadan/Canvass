@@ -2,20 +2,21 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { fitToScreen, zoomAt, type Viewport } from '../../lib/viewport'
 import { useMapStore } from '../../store/useMapStore'
 import { Frame } from '../frames/Frame'
-import { PillarHeader } from '../pillars/PillarHeader'
+import { Pillar } from '../pillars/Pillar'
+import { LibraryGroup } from '../tools/LibraryGroup'
 import { CompanyCard } from './CompanyCard'
 import { Connectors } from './Connectors'
+import { Toolbar } from './Toolbar'
 
 const WORLD_W = 2000
-const WORLD_H = 900
-const PILLAR_W = 224
+const WORLD_H = 2200
+const PILLAR_W = 232
 const PILLAR_GAP = 16
-const PILLAR_Y = 600
-const COMPANY = { x: WORLD_W / 2, y: 400 }
+const PILLAR_Y = 900
+const COMPANY = { x: WORLD_W / 2, y: 640 }
 
 export function Canvas() {
   const map = useMapStore((s) => s.map)
-  const reset = useMapStore((s) => s.resetToDefault)
   const ref = useRef<HTMLDivElement>(null)
   const drag = useRef<{ x: number; y: number } | null>(null)
   const [view, setView] = useState<Viewport>({ x: 0, y: 0, scale: 1 })
@@ -25,7 +26,7 @@ export function Canvas() {
     if (!el) return
     setView(
       fitToScreen(
-        { width: WORLD_W, height: WORLD_H },
+        { width: WORLD_W, height: 1650 },
         { width: el.clientWidth, height: el.clientHeight },
       ),
     )
@@ -36,6 +37,7 @@ export function Canvas() {
     const el = ref.current
     if (!el) return
     const onWheel = (e: WheelEvent) => {
+      if ((e.target as HTMLElement).closest('[data-no-zoom]')) return
       e.preventDefault()
       const r = el.getBoundingClientRect()
       setView((v) => zoomAt(v, e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.001)))
@@ -50,6 +52,7 @@ export function Canvas() {
     x: rowX + i * (PILLAR_W + PILLAR_GAP) + PILLAR_W / 2,
     y: PILLAR_Y,
   }))
+  const half = Math.ceil(map.library.length / 2)
 
   return (
     <div
@@ -57,9 +60,10 @@ export function Canvas() {
       data-testid="canvas"
       className="relative h-screen w-screen cursor-grab overflow-hidden bg-canvas-bg active:cursor-grabbing"
       onPointerDown={(e) => {
-        if (e.target !== e.currentTarget && !(e.target as HTMLElement).dataset.world) return
+        const t = e.target as HTMLElement
+        if (t !== e.currentTarget && !t.dataset.world) return
         drag.current = { x: e.clientX, y: e.clientY }
-        e.currentTarget.setPointerCapture(e.pointerId)
+        e.currentTarget.setPointerCapture?.(e.pointerId)
       }}
       onPointerMove={(e) => {
         if (!drag.current) return
@@ -79,38 +83,40 @@ export function Canvas() {
           transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
         }}
       >
-        <Connectors from={COMPANY} targets={targets} width={WORLD_W} height={WORLD_H} />
+        <Connectors
+          from={{ x: COMPANY.x, y: COMPANY.y - 50 }}
+          targets={targets}
+          width={WORLD_W}
+          height={WORLD_H}
+        />
         <div className="absolute left-0 top-8 flex w-full justify-center gap-6">
           {map.frames.map((f) => (
             <Frame key={f.id} frame={f} />
           ))}
         </div>
+        <div className="absolute left-6 top-72 flex flex-col gap-3">
+          {map.library.slice(0, half).map((g) => (
+            <LibraryGroup key={g.id} group={g} />
+          ))}
+        </div>
+        <div className="absolute right-6 top-72 flex flex-col gap-3">
+          {map.library.slice(half).map((g) => (
+            <LibraryGroup key={g.id} group={g} />
+          ))}
+        </div>
         <div
-          className="absolute -translate-x-1/2 -translate-y-1/2"
-          style={{ left: COMPANY.x, top: COMPANY.y - 60 }}
+          className="absolute -translate-x-1/2"
+          style={{ left: COMPANY.x, top: COMPANY.y - 160 }}
         >
           <CompanyCard company={map.company} />
         </div>
-        <div className="absolute flex gap-4" style={{ left: rowX, top: PILLAR_Y }}>
+        <div className="absolute flex items-start gap-4" style={{ left: rowX, top: PILLAR_Y }}>
           {map.pillars.map((p) => (
-            <PillarHeader key={p.id} pillar={p} />
+            <Pillar key={p.id} pillar={p} />
           ))}
         </div>
       </div>
-      <div className="absolute right-4 top-4 flex gap-2 font-mono text-xs">
-        <button
-          onClick={fit}
-          className="rounded border border-canvas-line bg-canvas-panel px-3 py-1 text-zinc-300"
-        >
-          Fit
-        </button>
-        <button
-          onClick={reset}
-          className="rounded border border-canvas-line bg-canvas-panel px-3 py-1 text-zinc-300"
-        >
-          Reset to default
-        </button>
-      </div>
+      <Toolbar onFit={fit} />
     </div>
   )
 }
