@@ -1,7 +1,10 @@
+import { createDefaultMap } from '../src/data/defaultMap'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../src/App'
 import { useMapStore } from '../src/store/useMapStore'
+
+const DEFAULT_NAME = createDefaultMap().company.name
 
 describe('inline editing and add/remove UI', () => {
   it('edits the company name and persists it to the store', async () => {
@@ -20,7 +23,7 @@ describe('inline editing and add/remove UI', () => {
     render(<App />)
     await user.click(screen.getByRole('button', { name: 'Edit company name' }))
     await user.type(screen.getByRole('textbox', { name: 'company name' }), 'zzz{Escape}')
-    expect(useMapStore.getState().map.company.name).toBe('Company Name')
+    expect(useMapStore.getState().map.company.name).toBe(DEFAULT_NAME)
   })
 
   it('edits a pillar objective', async () => {
@@ -36,10 +39,11 @@ describe('inline editing and add/remove UI', () => {
   it('adds and removes frame bullets', async () => {
     const user = userEvent.setup()
     render(<App />)
+    const n = createDefaultMap().frames[0].bullets.length
     await user.click(screen.getByRole('button', { name: 'Add frame 1 bullet' }))
-    expect(useMapStore.getState().map.frames[0].bullets).toHaveLength(2)
-    await user.click(screen.getByRole('button', { name: 'Remove frame 1 bullet 2' }))
-    expect(useMapStore.getState().map.frames[0].bullets).toHaveLength(1)
+    expect(useMapStore.getState().map.frames[0].bullets).toHaveLength(n + 1)
+    await user.click(screen.getByRole('button', { name: `Remove frame 1 bullet ${n + 1}` }))
+    expect(useMapStore.getState().map.frames[0].bullets).toHaveLength(n)
   })
 
   it('adds and removes a pillar section, and undo restores it', async () => {
@@ -59,7 +63,9 @@ describe('inline editing and add/remove UI', () => {
     render(<App />)
     await user.click(screen.getByRole('button', { name: 'Add frame 1 bullet' }))
     await user.click(screen.getByRole('button', { name: /Reset to default/ }))
-    expect(useMapStore.getState().map.frames[0].bullets).toHaveLength(1)
+    expect(useMapStore.getState().map.frames[0].bullets).toEqual(
+      createDefaultMap().frames[0].bullets,
+    )
   })
 
   it('adds a tool to a pillar section via the picker', async () => {

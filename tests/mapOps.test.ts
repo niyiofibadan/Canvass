@@ -1,12 +1,14 @@
 import { createDefaultMap } from '../src/data/defaultMap'
 import * as ops from '../src/store/mapOps'
 
+const DEFAULT_NAME = createDefaultMap().company.name
+
 describe('mapOps', () => {
   it('updates company, frame, pillar immutably', () => {
     const m = createDefaultMap()
     const m2 = ops.updateCompany(m, { name: 'Acme' })
     expect(m2.company.name).toBe('Acme')
-    expect(m.company.name).toBe('Company Name')
+    expect(m.company.name).toBe(DEFAULT_NAME)
     expect(ops.updateFrame(m, 'f1', { title: 'X' }).frames[0].title).toBe('X')
     expect(ops.updatePillar(m, 'p1', { objective: 'Obj' }).pillars[0].objective).toBe('Obj')
   })

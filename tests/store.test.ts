@@ -1,6 +1,9 @@
+import { createDefaultMap } from '../src/data/defaultMap'
 import { STORAGE_KEY, useMapStore } from '../src/store/useMapStore'
 import { updateCompany } from '../src/store/mapOps'
 import { exportMap, parseMap } from '../src/lib/mapIO'
+
+const DEFAULT_NAME = createDefaultMap().company.name
 
 describe('store', () => {
   it('persists edits to localStorage under canvass:v1', () => {
@@ -17,7 +20,7 @@ describe('store', () => {
     undo()
     expect(useMapStore.getState().map.company.name).toBe('A')
     resetToDefault()
-    expect(useMapStore.getState().map.company.name).toBe('Company Name')
+    expect(useMapStore.getState().map.company.name).toBe(DEFAULT_NAME)
     undo()
     expect(useMapStore.getState().map.company.name).toBe('A')
   })
